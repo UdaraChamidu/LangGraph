@@ -1,5 +1,6 @@
 from typing import Annotated, Sequence, TypedDict  
-# annotate and sequence ?
+# annotate - use to attach metadata to a type
+# sequence - This means the messages field is a list like sequence of BaseMessage objects.
 from dotenv import load_dotenv  
 from langchain_core.messages import BaseMessage # The foundational class for all message types in LangGraph
 from langchain_core.messages import ToolMessage # Passes data back to LLM after it calls a tool such as the content and the tool_call_id
@@ -7,6 +8,8 @@ from langchain_core.messages import SystemMessage # Message for providing instru
 from langchain_openai import ChatOpenAI
 from langchain_core.tools import tool
 from langgraph.graph.message import add_messages # reducer function...?
+# how to mmatch new data into the current state
+# without a reducer fumction, updates would have replaced the existing value entirely
 from langgraph.graph import StateGraph, END
 from langgraph.prebuilt import ToolNode
 # all are explained in the video
