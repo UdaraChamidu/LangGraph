@@ -31,15 +31,16 @@ agent = graph.compile()
 # create history
 conversation_history = []
 
+# continuous chat
 user_input = input("Enter : ")
 while user_input!= "exit":
     conversation_history.append(HumanMessage(content=user_input))
-    result = agent.invoke({"messages": conversation_history})
-    conversation_history = result["messages"]
+    result = agent.invoke({"messages": conversation_history})  # feed the full history to the agent
+    conversation_history = result["messages"]  # Updates the conversation history with the latest AI response included.
     user_input = input("Enter : ")
     
 # add messages into a txt file
-with open("logging.txt", 'w') as file:
+with open("logging.txt", 'w') as file:  # w - write
     file.write("your Conversation Log :\n")
     
     for message in conversation_history:
