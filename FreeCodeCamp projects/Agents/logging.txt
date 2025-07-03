@@ -1,0 +1,8 @@
+your Conversation Log:
+You :  hi
+AI :  Hello! How can I assist you today?
+You :  hello
+AI :  Hi there! How can I help you today?
+You :  cat
+AI :  Cats are wonderful creatures! Are you looking for information on cat care, behavior, breeds, or something else? Let me know how I can assist you!
+End of Conversation
