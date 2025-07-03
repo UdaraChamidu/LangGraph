@@ -10,7 +10,7 @@ from langgraph.graph.message import add_messages # reducer function...?
 from langgraph.graph import StateGraph, END
 from langgraph.prebuilt import ToolNode
 # all are explained in the video
-
+   
 load_dotenv()
 
 class AgentState(TypedDict):
@@ -19,7 +19,8 @@ class AgentState(TypedDict):
 @tool  # a decorator
 def add(a: int, b:int):
     """This is an addition function that adds 2 numbers together"""
-
+    # without function description of docstring, code give an error
+    # tell the llm what that do
     return a + b 
 
 # tools
@@ -38,7 +39,6 @@ tools = [add, subtract, multiply]  # list of tools
 model = ChatOpenAI(model = "gpt-4o").bind_tools(tools)
 # bind_tools - give the model llm to use tools
 
-
 # node initialize
 def model_call(state:AgentState) -> AgentState:
     system_prompt = SystemMessage(content=
@@ -47,20 +47,20 @@ def model_call(state:AgentState) -> AgentState:
     response = model.invoke([system_prompt] + state["messages"]) # system + query
     return {"messages": [response]} # update message with response (no + =)
 
+# conditional for the loop
 def should_continue(state: AgentState): 
     messages = state["messages"]
-    last_message = messages[-1]
-    if not last_message.tool_calls: 
+    last_message = messages[-1]  # last item of the message list
+    if not last_message.tool_calls:   # if no more tools to call, then end
         return "end"
     else: 
         return "continue"
-    
+  
 graph = StateGraph(AgentState)
 graph.add_node("our_agent", model_call)
 
-
-tool_node = ToolNode(tools=tools)
-graph.add_node("tools", tool_node)
+tool_node = ToolNode(tools=tools)  # tool node
+graph.add_node("tools", tool_node)  # give tools to tool node
 
 graph.set_entry_point("our_agent")
 
