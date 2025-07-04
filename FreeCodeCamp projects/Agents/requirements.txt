@@ -1,0 +1,24 @@
+# Core LangChain libraries
+langchain
+langchain-core
+langchain-community
+langchain-openai
+langchain-chroma
+
+# LangGraph
+langgraph
+
+# Vector DB
+chromadb
+
+# Environment management
+python-dotenv
+
+# PDF loading
+pypdf  # Required for PyPDFLoader
+
+# OpenAI API client
+openai
+
+# Token counting (optional but recommended)
+tiktoken
