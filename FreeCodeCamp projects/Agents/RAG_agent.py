@@ -21,7 +21,7 @@ embeddings = OpenAIEmbeddings(
     model="text-embedding-3-small",
 )
 
-pdf_path = "Stock_Market_Performance_2024.pdf"
+pdf_path = "machine learning.pdf"
 
 # Safety measure I have put for debugging purposes :)
 if not os.path.exists(pdf_path):
@@ -39,14 +39,15 @@ except Exception as e:
 
 # Chunking Process
 text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=1000,
-    chunk_overlap=200
+    chunk_size=500,
+    chunk_overlap=100
 )
 
 pages_split = text_splitter.split_documents(pages) # We now apply this to our pages
 
-persist_directory = r"C:\Vaibhav\LangGraph_Book\LangGraphCourse\Agents"
-collection_name = "stock_market"
+# vector store 
+persist_directory = r"C:\LangGraph\FreeCodeCamp projects\Agents" 
+collection_name = "m_l"
 
 # If our collection does not exist in the directory, we create using the os command
 if not os.path.exists(persist_directory):
@@ -80,6 +81,7 @@ def retriever_tool(query: str) -> str:
 
     docs = retriever.invoke(query)
 
+    # if data not found in vector store
     if not docs:
         return "I found no relevant information in the Stock Market Performance 2024 document."
     
@@ -103,15 +105,15 @@ def should_continue(state: AgentState):
     return hasattr(result, 'tool_calls') and len(result.tool_calls) > 0
 
 system_prompt = """
-You are an intelligent AI assistant who answers questions about Stock Market Performance in 2024 based on the PDF document loaded into your knowledge base.
-Use the retriever tool available to answer questions about the stock market performance data. You can make multiple calls if needed.
+You are an intelligent AI assistant who answers questions about machine learning based on the PDF document loaded into your knowledge base.
+Use the retriever tool available to answer questions about ML. You can make multiple calls if needed.
 If you need to look up some information before asking a follow up question, you are allowed to do that!
 Please always cite the specific parts of the documents you use in your answers.
 """
 
 tools_dict = {our_tool.name: our_tool for our_tool in tools} # Creating a dictionary of our tools
 
-# LLM Agent
+# LLM Agent (Agent 1)
 def call_llm(state: AgentState) -> AgentState:
     """Function to call the LLM with the current state."""
     messages = list(state['messages'])
@@ -119,7 +121,7 @@ def call_llm(state: AgentState) -> AgentState:
     message = llm.invoke(messages)
     return {'messages': [message]}
 
-# Retriever Agent
+# Retriever Agent (Agent 2)
 def take_action(state: AgentState) -> AgentState:
     """Execute tool calls from the LLM's response."""
 
@@ -156,6 +158,7 @@ graph.set_entry_point("llm")
 
 rag_agent = graph.compile()
 
+# Q and A continuous...
 def running_agent():
     print("\n=== RAG AGENT===")
     
