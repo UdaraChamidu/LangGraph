@@ -11,7 +11,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
 from langchain_core.tools import tool
 
-load_dotenv()
+load_dotenv()  
 
 llm = ChatOpenAI(
     model="gpt-4o", temperature = 0) # I want to minimize hallucination - temperature = 0 makes the model output more deterministic 
@@ -21,9 +21,7 @@ embeddings = OpenAIEmbeddings(
     model="text-embedding-3-small",
 )
 
-
 pdf_path = "Stock_Market_Performance_2024.pdf"
-
 
 # Safety measure I have put for debugging purposes :)
 if not os.path.exists(pdf_path):
@@ -45,7 +43,6 @@ text_splitter = RecursiveCharacterTextSplitter(
     chunk_overlap=200
 )
 
-
 pages_split = text_splitter.split_documents(pages) # We now apply this to our pages
 
 persist_directory = r"C:\Vaibhav\LangGraph_Book\LangGraphCourse\Agents"
@@ -54,7 +51,6 @@ collection_name = "stock_market"
 # If our collection does not exist in the directory, we create using the os command
 if not os.path.exists(persist_directory):
     os.makedirs(persist_directory)
-
 
 try:
     # Here, we actually create the chroma database using our embeddigns model
@@ -69,7 +65,6 @@ try:
 except Exception as e:
     print(f"Error setting up ChromaDB: {str(e)}")
     raise
-
 
 # Now we create our retriever 
 retriever = vectorstore.as_retriever(
@@ -102,12 +97,10 @@ llm = llm.bind_tools(tools)
 class AgentState(TypedDict):
     messages: Annotated[Sequence[BaseMessage], add_messages]
 
-
 def should_continue(state: AgentState):
     """Check if the last message contains tool calls."""
     result = state['messages'][-1]
     return hasattr(result, 'tool_calls') and len(result.tool_calls) > 0
-
 
 system_prompt = """
 You are an intelligent AI assistant who answers questions about Stock Market Performance in 2024 based on the PDF document loaded into your knowledge base.
@@ -115,7 +108,6 @@ Use the retriever tool available to answer questions about the stock market perf
 If you need to look up some information before asking a follow up question, you are allowed to do that!
 Please always cite the specific parts of the documents you use in your answers.
 """
-
 
 tools_dict = {our_tool.name: our_tool for our_tool in tools} # Creating a dictionary of our tools
 
@@ -126,7 +118,6 @@ def call_llm(state: AgentState) -> AgentState:
     messages = [SystemMessage(content=system_prompt)] + messages
     message = llm.invoke(messages)
     return {'messages': [message]}
-
 
 # Retriever Agent
 def take_action(state: AgentState) -> AgentState:
@@ -145,13 +136,11 @@ def take_action(state: AgentState) -> AgentState:
             result = tools_dict[t['name']].invoke(t['args'].get('query', ''))
             print(f"Result length: {len(str(result))}")
             
-
         # Appends the Tool Message
         results.append(ToolMessage(tool_call_id=t['id'], name=t['name'], content=str(result)))
 
     print("Tools Execution Complete. Back to the model!")
     return {'messages': results}
-
 
 graph = StateGraph(AgentState)
 graph.add_node("llm", call_llm)
@@ -167,7 +156,6 @@ graph.set_entry_point("llm")
 
 rag_agent = graph.compile()
 
-
 def running_agent():
     print("\n=== RAG AGENT===")
     
@@ -182,6 +170,5 @@ def running_agent():
         
         print("\n=== ANSWER ===")
         print(result['messages'][-1].content)
-
 
 running_agent()

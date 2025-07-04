@@ -10,7 +10,7 @@ from langgraph.graph.message import add_messages
 from langgraph.graph import StateGraph, END
 from langgraph.prebuilt import ToolNode
 
-load_dotenv()
+load_dotenv() 
 
 # This is the global variable to store document content
 document_content = ""
@@ -18,15 +18,14 @@ document_content = ""
 class AgentState(TypedDict):
     messages: Annotated[Sequence[BaseMessage], add_messages]
 
-
 @tool
 def update(content: str) -> str:
     """Updates the document with the provided content."""
     global document_content  # global variable
-    document_content = content
+    document_content = content # give the coming value from the parameter to the document_content 
     return f"Document has been updated successfully! The current content is:\n{document_content}"
-
-
+    # return the document details
+    
 @tool
 def save(filename: str) -> str:
     """Save the current document to a text file and finish the process.
@@ -34,7 +33,7 @@ def save(filename: str) -> str:
     Args:
         filename: Name for the text file.
     """
-
+ 
     global document_content
 
     if not filename.endswith('.txt'):
@@ -55,6 +54,7 @@ tools = [update, save]
 
 model = ChatOpenAI(model="gpt-4o").bind_tools(tools)
 
+# Agent node
 def our_agent(state: AgentState) -> AgentState:
     system_prompt = SystemMessage(content=f"""
     You are Drafter, a helpful writing assistant. You are going to help the user update and modify documents.
@@ -79,13 +79,15 @@ def our_agent(state: AgentState) -> AgentState:
 
     response = model.invoke(all_messages)
 
+    # make pritty the output. 
     print(f"\n🤖 AI: {response.content}")
     if hasattr(response, "tool_calls") and response.tool_calls:
         print(f"🔧 USING TOOLS: {[tc['name'] for tc in response.tool_calls]}")
 
     return {"messages": list(state["messages"]) + [user_message, response]}
 
-
+# conditional edge function
+# to decide, continue or end the conversation
 def should_continue(state: AgentState) -> str:
     """Determine if we should continue or end the conversation."""
 
@@ -104,6 +106,7 @@ def should_continue(state: AgentState) -> str:
         
     return "continue"
 
+# normal function
 def print_messages(messages):
     """Function I made to print the messages in a more readable format"""
     if not messages:
@@ -128,6 +131,7 @@ graph.add_conditional_edges(
     "tools",
     should_continue,
     {
+        # edge name, agent/node
         "continue": "agent",
         "end": END,
     },
